@@ -1,0 +1,88 @@
+﻿@model ChatO.Models.ChatVm
+
+@{
+    @* Título de la página y layout compartido *@
+    ViewBag.Title = "ChatO";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@* Sección opcional de estilos para que el _Layout la renderice con RenderSection("styles", required:false) *@
+@section styles {
+    <link rel="stylesheet" href="@Url.Content("~/Content/css/ChatO.css")" />
+}
+
+<!-- Contenedor principal del chat -->
+<div class="chat-container">
+
+    <!-- Barra superior con título y botón para reiniciar conversación -->
+    <div class="toolbar">
+        <h2>@ViewBag.Title</h2>
+
+        @* Formulario que hace POST a Chat/Reset para limpiar el historial *@
+        @using (Html.BeginForm("Reset", "Chat", FormMethod.Post))
+        {
+            @* Token anti-CSRF obligatorio en POST *@
+            @Html.AntiForgeryToken()
+            <button type="submit">Nueva conversación</button>
+        }
+    </div>
+
+    <!-- Área de historial de mensajes -->
+    <div id="chatLog" class="chat-log">
+        @* Si hay chats, listarlos; si no, mostrar mensaje de bienvenida *@
+        @if (Model.Turns != null && Model.Turns.Count > 0)
+        {
+            @* Recorre cada turno (usuario/assistant/sistema) *@
+            foreach (var t in Model.Turns)
+            {
+                @* roleClass permite aplicar estilos distintos por rol (user/assistant/system) *@
+                var roleClass = t.Role;
+                <div class="msg @roleClass">
+                    <strong>@t.Role:</strong>
+
+                    @*
+                        Seguridad XSS:
+                        1) HtmlEncode(t.Content) neutraliza HTML peligroso.
+                        2) Replace("\n","<br/>") respeta saltos de línea.
+                        3) Html.Raw(...) solo luego de encodear y reemplazar.
+                    *@
+                    <div>@Html.Raw(HttpUtility.HtmlEncode(t.Content).Replace("\n", "<br/>"))</div>
+                </div>
+            }
+        }
+        else
+        {
+            @* Mensaje inicial cuando no hay historial *@
+            <div class="msg system">
+                Bienvenido a ChatO. Escribe un mensaje para comenzar.
+            </div>
+        }
+    </div>
+
+    @* Bloque de error (si el controlador envió algún mensaje de error al ViewModel) *@
+    @if (!string.IsNullOrEmpty(Model.Error))
+    {
+        <div class="error">Error: @Model.Error</div>
+    }
+
+    @* Formulario del compositor de mensajes: envía el prompt al action Index (POST) *@
+    @using (Html.BeginForm("Index", "Chat", FormMethod.Post, new { id = "composerForm" }))
+    {
+        @Html.AntiForgeryToken()
+        <div class="composer">
+            @* TextArea ligado a ChatVm.Input con placeholder y autofocus *@
+            @Html.TextAreaFor(m => m.Input, new { placeholder = "Escribe tu mensaje...", autofocus = "autofocus" })
+
+            @* Botón para enviar el prompt *@
+            <button type="submit">Enviar</button>
+        </div>
+    }
+</div>
+
+@* Script liviano para auto-hacer scroll al final del historial al cargar la vista *@
+<script>
+    (function () {
+        var el = document.getElementById('chatLog');
+        if (el) el.scrollTop = el.scrollHeight;
+    })();
+</script>

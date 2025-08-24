@@ -1,0 +1,164 @@
+﻿
+.chat-container {
+    /* paleta simple local al chat (custom properties solo dentro del contenedor) */
+    --panel: #fff; /* color de fondo de paneles (burbujas, composer) */
+    --border: #ddd; /* color de bordes suaves */
+    --muted: #666; /* color de texto secundario (etiquetas, strong) */
+    --user-bg: #e8f0fe; /* fondo de burbuja del usuario */
+    --asst-bg: #f3f4f6; /* fondo de burbuja del asistente */
+    --sys-bg: #fff8e1; /* fondo de burbuja de mensajes “system” */
+    max-width: 920px; /* ancho máximo del contenedor del chat */
+    margin: 0 auto; /* centra horizontalmente */
+    padding: 16px; /* espacio interior del contenedor */
+    display: flex; /* layout en columna para apilar toolbar, log y composer */
+    flex-direction: column; /* apilado vertical */
+    gap: 12px; /* separación entre secciones internas */
+    color: inherit; /* hereda el color de texto global (no lo altera) */
+}
+
+    /* Toolbar (barra superior del chat) */
+    .chat-container .toolbar {
+        display: flex; /* alinea título y botón en fila */
+        align-items: center; /* centra verticalmente los elementos */
+        justify-content: space-between; /* separa título y botón a extremos */
+        gap: 8px; /* espacio entre elementos si se agrupan */
+        margin-bottom: 4px; /* leve separación inferior */
+    }
+
+        .chat-container .toolbar h2 {
+            margin: 0; /* elimina margen por defecto del título */
+        }
+
+        .chat-container .toolbar form button {
+            padding: 8px 12px; /* tamaño del botón */
+            border: 1px solid var(--border); /* borde suave consistente con la paleta */
+            background: var(--panel); /* fondo claro del botón */
+            border-radius: 8px; /* esquinas redondeadas */
+            cursor: pointer; /* cursor de mano */
+        }
+
+    /* Chat log (área scrollable con las burbujas) */
+    .chat-container .chat-log {
+        display: flex; /* contenedor flexible para apilar burbujas */
+        flex-direction: column; /* apilado vertical de mensajes */
+        gap: 10px; /* separación entre burbujas */
+        border: 1px solid var(--border); /* borde externo del área de chat */
+        border-radius: 10px; /* esquinas redondeadas */
+        padding: 12px; /* espacio interno del área de chat */
+        height: 60vh; /* altura relativa a la ventana para buen viewport */
+        min-height: 340px; /* asegura una altura mínima usable */
+        max-height: 640px; /* limita altura máxima en pantallas grandes */
+        overflow-y: auto; /* scroll vertical para el log */
+        background: var(--panel); /* fondo del área de chat */
+    }
+
+    /* Burbujas de mensaje */
+    .chat-container .msg {
+        padding: 8px 10px; /* respiración interna de cada burbuja */
+        border-radius: 10px; /* esquinas redondeadas de la burbuja */
+        line-height: 1.45; /* legibilidad del texto */
+        width: fit-content; /* ancho ajustado al contenido */
+        max-width: 78%; /* evita que una burbuja sea demasiado ancha */
+        word-wrap: break-word; /* rompe palabras largas si es necesario (legacy) */
+        overflow-wrap: anywhere; /* permite cortar palabras en cualquier punto si no caben */
+        border: 1px solid var(--border); /* borde sutil de la burbuja */
+    }
+
+        .chat-container .msg strong {
+            display: block; /* que ocupe su propia línea sobre el contenido */
+            font-size: 0.78rem; /* tamaño pequeño para la etiqueta del rol */
+            color: var(--muted); /* color atenuado para el rol */
+            margin-bottom: 4px; /* separación respecto al contenido del mensaje */
+            text-transform: capitalize; /* “user” -> “User”, etc. */
+        }
+
+        .chat-container .msg > div {
+            white-space: pre-wrap; /* respeta saltos de línea y colapsa espacios */
+        }
+
+        /* Alineación por rol (soporta minúsculas y mayúsculas) */
+        .chat-container .msg.assistant,
+        .chat-container .msg.Assistant {
+            align-self: flex-start; /* pegado a la izquierda para el asistente */
+            background: var(--asst-bg); /* color de fondo del asistente */
+        }
+
+        .chat-container .msg.user,
+        .chat-container .msg.User {
+            align-self: flex-end; /* pegado a la derecha para el usuario */
+            background: var(--user-bg); /* color de fondo del usuario */
+        }
+
+        .chat-container .msg.system,
+        .chat-container .msg.System {
+            align-self: center; /* centrado para mensajes de sistema/informativos */
+            background: var(--sys-bg); /* color de fondo del sistema */
+            font-style: italic; /* estilo para diferenciar esos mensajes */
+            max-width: 90%; /* un poco más ancho para avisos generales */
+        }
+
+    /* Composer (área de entrada + botón) */
+    .chat-container .composer {
+        display: flex; /* textarea y botón en fila */
+        gap: 10px; /* separación entre textarea y botón */
+        margin-top: 8px; /* separación respecto al chat-log */
+        background: var(--panel); /* fondo del contenedor del composer */
+        border: 1px solid var(--border); /* borde suave alrededor */
+        border-radius: 10px; /* esquinas redondeadas */
+        padding: 8px; /* espacio interno */
+    }
+
+        .chat-container .composer textarea {
+            flex: 1; /* el textarea ocupa todo el espacio disponible */
+            min-height: 88px; /* altura mínima cómoda para escribir */
+            max-height: 45vh; /* evita que crezca demasiado */
+            resize: vertical; /* permite redimensionar solo verticalmente */
+            padding: 8px 10px; /* respiración interna del textarea */
+            border-radius: 8px; /* esquinas del textarea */
+            border: 1px solid var(--border); /* borde coherente con resto de UI */
+            background: transparent; /* fondo transparente para integrarse con el panel */
+            font-family: inherit; /* usa la misma tipografía del sitio */
+            line-height: 1.4; /* legibilidad del texto */
+            outline: none; /* quita el outline por defecto (usamos border-color al focus) */
+        }
+
+            .chat-container .composer textarea:focus {
+                border-color: #6aa3ff; /* resaltado visual al enfocar el textarea */
+            }
+
+        .chat-container .composer button {
+            padding: 10px 14px; /* tamaño del botón Enviar */
+            border: 0; /* sin borde visible */
+            border-radius: 8px; /* esquinas redondeadas */
+            cursor: pointer; /* cursor de mano */
+            background: #111827; /* color de fondo del botón (oscuro) */
+            color: #fff; /* texto en blanco para contraste */
+            font-weight: 600; /* enfatiza la acción */
+            align-self: flex-end; /* alinea el botón al borde inferior del composer */
+            min-width: 110px; /* ancho mínimo para consistencia */
+        }
+
+    /* Mensajes de error (debajo del log o del composer) */
+    .chat-container .error {
+        color: #b00020; /* rojo para texto de error */
+        background: #fde7eb; /* fondo rosado claro */
+        border: 1px solid #f7c7cf; /* borde acorde al fondo */
+        padding: 8px 12px; /* respiración interna */
+        border-radius: 8px; /* esquinas redondeadas */
+        margin-top: 8px; /* separación respecto al elemento anterior */
+    }
+
+/* Responsive: ajustes mínimos para pantallas pequeñas */
+@media (max-width: 640px) {
+    .chat-container {
+        padding: 12px; /* reduce el padding lateral */
+    }
+
+        .chat-container .msg {
+            max-width: 90%; /* burbujas un poco más anchas para aprovechar el ancho */
+        }
+
+        .chat-container .composer button {
+            min-width: 96px; /* botón algo más estrecho en móviles */
+        }
+}
